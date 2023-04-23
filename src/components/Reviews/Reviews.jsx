@@ -5,38 +5,39 @@ import { ListReviews } from './Reviews.styled';
 import { toast } from 'react-hot-toast';
 import { Loader } from 'components/Loader/Loader';
 
-export const Reviews = () => {
-  const { id } = useParams();
+const Reviews = () => {
+  const { movieId } = useParams();
   const [reviews, setReviews] = useState(null);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const getIdFilmReviewsAsync = async () => {
-    try {
-      const data = await getIdFilmReviews(id);
-      if (data === 0) {
-        setReviews(null);
-        return toast.error('Unknown error');
-      }
-      setReviews(data);
-    } catch (error) {
-      setError(error);
-      toast.error(error.response.data.status_message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   useEffect(() => {
+    async function getReviews() {
+      try {
+        setError(null);
+        const data = await getIdFilmReviews(movieId);
+        if (data.results.length === 0) {
+          setReviews(null);
+          return;
+        }
+        setReviews(data);
+      } catch (error) {
+        setError(error);
+        toast.error(error.response.data.status_message);
+      } finally {
+        setIsLoading(false);
+      }
+    }
     setIsLoading(true);
-    setError(null);
-    getIdFilmReviewsAsync();
-  }, []);
+    getReviews();
+  }, [movieId]);
   return (
-    <section>
+    <>
       <Loader isLoading={isLoading} />
-      {error && <h1>{error.response.data.status_message}</h1>}
-      {reviews && (
+      {error && <h2>{error.response.data.status_message}</h2>}
+      {reviews === null ? (
+        <p>Not Found Reviews</p>
+      ) : (
         <ListReviews>
           {reviews.results.map(review => (
             <li key={review.id}>
@@ -47,6 +48,8 @@ export const Reviews = () => {
           ))}
         </ListReviews>
       )}
-    </section>
+    </>
   );
 };
+
+export default Reviews;
