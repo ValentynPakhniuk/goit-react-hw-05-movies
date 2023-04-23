@@ -4,43 +4,48 @@ import { toast } from 'react-hot-toast';
 import { useParams } from 'react-router-dom';
 import { Loader } from 'components/Loader/Loader';
 
-export const Cast = () => {
-  const { id } = useParams();
+const Cast = () => {
+  const { movieId } = useParams();
   const [cast, setCast] = useState(null);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const getMovieIdCastAsync = async () => {
-    try {
-      const data = await getIdFilmCredits(id);
-      if (data === 0) {
-        setCast(null);
-        return toast.error('Unknown error');
-      }
-      setCast(data);
-    } catch (error) {
-      setError(error);
-      toast.error(error.response.data.status_message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   useEffect(() => {
-    setIsLoading(true);
-    setError(null);
+    async function getMovieIdCastAsync() {
+      setIsLoading(true);
+      try {
+        setError(null);
+        const data = await getIdFilmCredits(movieId);
+        if (data.cast.length === 0) {
+          setCast(null);
+          return;
+        }
+        setCast(data);
+      } catch (error) {
+        setError(error);
+        toast.error(error.response.data.status_message);
+      } finally {
+        setIsLoading(false);
+      }
+    }
     getMovieIdCastAsync();
-  }, []);
+  }, [movieId]);
   return (
-    <section>
+    <>
       <Loader isLoading={isLoading} />
-      {error && <h1>{error.response.data.status_message}</h1>}
-      {cast && (
+      {error && <h2>{error.response.data.status_message}</h2>}
+      {cast === null ? (
+        <p>Not Found Cast</p>
+      ) : (
         <ul>
           {cast.cast.map(actor => (
             <li key={actor.id}>
               <img
-                src={`https://image.tmdb.org/t/p/original${actor.profile_path}`}
+                src={
+                  actor.profile_path !== null
+                    ? `https://image.tmdb.org/t/p/original${actor.profile_path}`
+                    : `https://thumbs.dreamstime.com/b/best-design-global-news-digital-illusration-71660044.jpg`
+                }
                 alt={cast.name}
                 width="150"
               />
@@ -50,6 +55,8 @@ export const Cast = () => {
           ))}
         </ul>
       )}
-    </section>
+    </>
   );
 };
+
+export default Cast;
