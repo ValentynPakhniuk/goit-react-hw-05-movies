@@ -1,46 +1,30 @@
-import { Link, Route, Routes } from 'react-router-dom';
-import { HeaderBox } from './Header/Header';
-import { ListTrending } from './ListTrending/ListTrending';
-import { CardItem } from './ItemFilm/ItemFilm';
-import { MovieId } from './MoviesId/MoviesId';
-import { Movies } from './Movies/Movies';
-import { useState } from 'react';
-import { Searchbar } from './Seatchbar/Searchbar';
-import { StyledLink } from './ItemFilm/ItemFilm.styled';
-import { Cast, FilmCredits } from './Cast/Cast';
-import { Reviews } from './Reviews/Reviews';
-import { Container } from './Container.styled';
+import { Route, Routes } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
+import { lazy } from 'react';
+import SharedLayout from './SharedLayout/SharedLayout';
+import { NotFound } from './NotFound/NotFound';
+
+const Home = lazy(() => import('../pages/Home/Home'));
+const Movies = lazy(() => import('../pages/Movies/Movies'));
+const MovieDetails = lazy(() => import('../pages/MovieDetails/MovieDetails'));
+const Cast = lazy(() => import('./Cast/Cast'));
+const Reviews = lazy(() => import('./Reviews/Reviews'));
 
 export const App = () => {
   return (
-    <Container>
-      <Toaster position="top-right" toastOptions={{ duration: 3000 }} />
-      <HeaderBox>
-        <nav>
-          <StyledLink to="/" end>
-            Home
-          </StyledLink>
-          <StyledLink to="/movies">Movies</StyledLink>
-        </nav>
-      </HeaderBox>
-
+    <>
       <Routes>
-        <Route path="/" element={<ListTrending />} />
-        <Route
-          path="/movies"
-          element={
-            <Movies
-            // searchText={searchText}
-            // createSearchText={createSearchText}
-            />
-          }
-        ></Route>
-        <Route path="/movies/:id" element={<MovieId />}>
-          <Route path="cast" element={<Cast />} />
-          <Route path="reviews" element={<Reviews />} />
+        <Route path="/" element={<SharedLayout />}>
+          <Route index element={<Home />} />
+          <Route path="/movies" element={<Movies />} />
+          <Route path="/movies/:movieId" element={<MovieDetails />}>
+            <Route path="cast" element={<Cast />} />
+            <Route path="reviews" element={<Reviews />} />
+          </Route>
         </Route>
+        <Route path="*" element={<NotFound />} />
       </Routes>
-    </Container>
+      <Toaster position="top-right" toastOptions={{ duration: 3000 }} />
+    </>
   );
 };
