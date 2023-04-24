@@ -12,24 +12,30 @@ const Reviews = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
+    const controller = new AbortController();
     async function getReviews() {
       try {
         setError(null);
-        const data = await getIdFilmReviews(movieId);
+        const data = await getIdFilmReviews(movieId, controller);
         if (data.results.length === 0) {
           setReviews(null);
           return;
         }
         setReviews(data);
       } catch (error) {
-        setError(error);
-        toast.error(error.response.data.status_message);
+        if (error.response) {
+          setError(error);
+          toast.error(error.response.data.status_message);
+        }
       } finally {
         setIsLoading(false);
       }
     }
     setIsLoading(true);
     getReviews();
+    return () => {
+      controller.abort();
+    };
   }, [movieId]);
   return (
     <>
@@ -39,11 +45,11 @@ const Reviews = () => {
         <p>Not Found Reviews</p>
       ) : (
         <ListReviews>
-          {reviews.results.map(review => (
-            <li key={review.id}>
+          {reviews.results.map(({ id, author, content }) => (
+            <li key={id}>
               <span>Author: </span>
-              {review.author}
-              <p>{review.content}</p>
+              {author}
+              <p>{content}</p>
             </li>
           ))}
         </ListReviews>
