@@ -22,25 +22,32 @@ const MovieDetails = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
+    const controller = new AbortController();
     async function getMovieDetails() {
       setIsLoading(true);
       try {
         setError(null);
-        const data = await getIdFilm(movieId);
+        const data = await getIdFilm(movieId, controller);
         if (!data) {
           setMovieIdFilms(null);
           return toast.error('Not found');
         }
         setMovieIdFilms(data);
       } catch (error) {
-        setError(error);
-        toast.error(error.response.data.status_message);
+        if (error.response) {
+          setError(error);
+          toast.error(error.response.data.status_message);
+        }
       } finally {
         setIsLoading(false);
       }
     }
     getMovieDetails();
+    return () => {
+      controller.abort();
+    };
   }, [movieId]);
+
   return (
     <>
       <Loader isLoading={isLoading} />
@@ -61,7 +68,7 @@ const MovieDetails = () => {
           <div>
             <h2>
               {movieIdFilms.title || movieIdFilms.name} (
-              {movieIdFilms.release_date.slice(0, 4)})
+              {new Date(movieIdFilms.release_date).getFullYear()})
             </h2>
             <p>Use score: {(movieIdFilms.vote_average * 10).toFixed(0)}%</p>
             <h3>Overview</h3>
@@ -70,8 +77,8 @@ const MovieDetails = () => {
             <h4>Genres</h4>
             {(
               <ListGenres>
-                {movieIdFilms.genres.map(genre => (
-                  <li key={genre.id}>{genre.name}</li>
+                {movieIdFilms.genres.map(({ id, name }) => (
+                  <li key={id}>{name}</li>
                 ))}
               </ListGenres>
             ) || <span>No information</span>}
