@@ -15,27 +15,22 @@ const SearchBarMovies = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const query = searchParams.get('query') ?? '';
 
-  const setParamsName = ({ target: { value } }) => {
-    const nextParams = value !== '' ? { query: value } : {};
-    setSearchParams(nextParams);
-  };
-
   const handleSubmit = e => {
     e.preventDefault();
-    if (!query) {
+    const nextParams = searchText !== '' ? { query: searchText } : {};
+    setSearchParams(nextParams);
+    if (!searchText) {
       return toast.error(
         'Sorry, there are no films matching your search query. Please try again.'
       );
     }
-    setSearchText(query);
   };
 
   useEffect(() => {
     if (query) {
       setSearchText(query);
     }
-    // eslint-disable-next-line
-  }, []);
+  }, [query]);
 
   return (
     <section>
@@ -43,17 +38,18 @@ const SearchBarMovies = () => {
         <SearchForm onSubmit={handleSubmit}>
           <SearchFormInput
             type="text"
+            name="name"
             autoComplete="off"
             autoFocus
-            onChange={setParamsName}
-            value={query}
+            onChange={e => setSearchText(e.target.value)}
+            value={searchText}
           />
           <SearchFormButton type="submit">
             <span>Search</span>
           </SearchFormButton>
         </SearchForm>
       </SearchbarStyled>
-      {searchText && <MoviesList searchText={searchText} />}
+      {query && <MoviesList searchText={query} />}
     </section>
   );
 };
