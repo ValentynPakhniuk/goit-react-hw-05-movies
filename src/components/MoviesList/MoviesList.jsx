@@ -12,6 +12,7 @@ const MoviesList = ({ searchText }) => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    const controller = new AbortController();
     if (searchText === '') {
       return;
     }
@@ -19,7 +20,7 @@ const MoviesList = ({ searchText }) => {
       async function getMoviesList() {
         setError(null);
         try {
-          const data = await getSearchFilm(searchText);
+          const data = await getSearchFilm(searchText, controller);
           if (data.length === 0) {
             setListFilms(null);
             return toast.error(
@@ -28,14 +29,19 @@ const MoviesList = ({ searchText }) => {
           }
           setListFilms([...data]);
         } catch (error) {
-          setError(error);
-          toast.error(error.response.data.status_message);
+          if (error.response) {
+            setError(error);
+            toast.error(error.response.data.status_message);
+          }
         } finally {
           setIsLoading(false);
         }
       }
       setIsLoading(true);
       getMoviesList();
+      return () => {
+        controller.abort();
+      };
     }
   }, [searchText]);
   return (
