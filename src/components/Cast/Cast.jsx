@@ -11,24 +11,30 @@ const Cast = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
+    const controller = new AbortController();
     async function getMovieIdCastAsync() {
       setIsLoading(true);
       try {
         setError(null);
-        const data = await getIdFilmCredits(movieId);
+        const data = await getIdFilmCredits(movieId, controller);
         if (data.cast.length === 0) {
           setCast(null);
           return;
         }
         setCast(data);
       } catch (error) {
-        setError(error);
-        toast.error(error.response.data.status_message);
+        if (error.response) {
+          setError(error);
+          toast.error(error.response.data.status_message);
+        }
       } finally {
         setIsLoading(false);
       }
     }
     getMovieIdCastAsync();
+    return () => {
+      controller.abort();
+    };
   }, [movieId]);
   return (
     <>
@@ -38,19 +44,19 @@ const Cast = () => {
         <p>Not Found Cast</p>
       ) : (
         <ul>
-          {cast.cast.map(actor => (
-            <li key={actor.id}>
+          {cast.cast.map(({ id, profile_path, name, character }) => (
+            <li key={id}>
               <img
                 src={
-                  actor.profile_path !== null
-                    ? `https://image.tmdb.org/t/p/original${actor.profile_path}`
+                  profile_path !== null
+                    ? `https://image.tmdb.org/t/p/original${profile_path}`
                     : `https://thumbs.dreamstime.com/b/best-design-global-news-digital-illusration-71660044.jpg`
                 }
-                alt={cast.name}
+                alt={name}
                 width="150"
               />
-              <p>{actor.name}</p>
-              <p>Character: {actor.character}</p>
+              <p>{name}</p>
+              <p>Character: {character}</p>
             </li>
           ))}
         </ul>
