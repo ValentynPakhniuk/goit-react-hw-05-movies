@@ -9,25 +9,25 @@ export async function getTrendingFilms(controller) {
   return response.data.results;
 }
 
-export async function getSearchFilm(search) {
+export async function getSearchFilm(search, controller) {
   const URL = `https://api.themoviedb.org/3/search/movie?query=${search}&api_key=${API_KEY}&language=en-US&page=1&include_adult=false`;
-  const data = await axios.get(URL);
+  const data = await axios.get(URL, { signal: controller.signal });
   return data.data.results;
 }
-export async function getIdFilm(movie_id) {
+export async function getIdFilm(movie_id, controller) {
   const URL = `https://api.themoviedb.org/3/movie/${movie_id}?api_key=${API_KEY}&language=en-US`;
-  const data = await axios.get(URL);
+  const data = await axios.get(URL, { signal: controller.signal });
   return data.data;
 }
 
-export async function getIdFilmCredits(movie_id) {
+export async function getIdFilmCredits(movie_id, controller) {
   const URL = `https://api.themoviedb.org/3/movie/${movie_id}/credits?api_key=${API_KEY}&language=en-US`;
-  const data = await axios.get(URL);
+  const data = await axios.get(URL, { signal: controller.signal });
   return data.data;
 }
 
-export async function getIdFilmReviews(movie_id) {
+export async function getIdFilmReviews(movie_id, controller) {
   const URL = `https://api.themoviedb.org/3/movie/${movie_id}/reviews?api_key=${API_KEY}&language=en-US&page=1`;
-  const data = await axios.get(URL);
+  const data = await axios.get(URL, { signal: controller.signal });
   return data.data;
 }
